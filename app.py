@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 st.set_page_config(
     page_title="Nassau Candy Profitability Analysis",
@@ -142,9 +143,30 @@ with tab4:
     pareto_df['Cum_Profit'] = pareto_df['Total_Profit'].cumsum()
     pareto_df['Cum_Profit_Pct'] = (pareto_df['Cum_Profit'] / pareto_df['Total_Profit'].sum()) * 100
     
-    fig_pareto = go.Figure()
-    fig_pareto.add_trace(go.Bar(x=pareto_df['Product Name'], y=pareto_df['Total_Profit'], name='Gross Profit ($)'))
-    fig_pareto.add_trace(go.Scatter(x=pareto_df['Product Name'], y=pareto_df['Cum_Profit_Pct'], name='Cumulative Profit %', yaxis='yaxis2', line=dict(color='red', width=3)))
+    # 1. Create subplots with secondary Y-axis enabled
+fig_pareto = make_subplots(specs=[[{"secondary_y": True}]])
+
+# 2. Add Bar trace for Profit (Primary Y-axis)
+fig_pareto.add_trace(
+    go.Bar(x=pareto_df['Product Name'], y=pareto_df['Profit'], name='Profit'),
+    secondary_y=False
+)
+
+# 3. Add Line trace for Cumulative Profit % (Secondary Y-axis)
+fig_pareto.add_trace(
+    go.Scatter(
+        x=pareto_df['Product Name'], 
+        y=pareto_df['Cum_Profit_Pct'], 
+        name='Cumulative Profit %', 
+        line=dict(color='red', width=3)
+    ),
+    secondary_y=True
+)
+
+# 4. Update axis labels
+fig_pareto.update_yaxes(title_text="Total Profit ($)", secondary_y=False)
+fig_pareto.update_yaxes(title_text="Cumulative Profit (%)", range=[0, 105], secondary_y=True)
+fig_pareto.update_layout(title="Pareto Chart: Cumulative Profit Contribution")
     fig_pareto.update_layout(
         title='Pareto Analysis: Cumulative Gross Profit',
         yaxis=dict(title='Gross Profit ($)'),

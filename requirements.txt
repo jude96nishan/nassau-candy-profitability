@@ -1,4 +1,4 @@
 streamlit
 pandas
 plotly
-numpy
+openpyxl>=3.1.0
